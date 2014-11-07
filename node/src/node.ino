@@ -35,13 +35,13 @@ void loop()
   //check for any received packets
   if (radio.receiveDone())
   {
-    packet_print(radio.DATA, radio.RSSI);
+    Serial.print("RX: ");packet_print(radio.DATA, radio.RSSI);
     
     cylon_packet_t * p = (cylon_packet_t *)radio.DATA;
 
     if (is_ack_requested(p))
     {
-      send_ack(radio, p->to, p->from);
+      send_ack(radio, 0xdeadbeef, p->from);
       Serial.print(" - ACK sent");
     }
     Blink(LED,5);
@@ -56,7 +56,7 @@ void loop()
 
     char msg[10]={0};static int i;
     sprintf(msg, "%d", i++);
-    send_data(radio, 0xdeadbeef, 0xabad1dea, REQUEST_ACK, strlen(msg), msg);
+    send_data(radio, 0xdeadbeef, 0xabad1dea, REQUEST_ACK, strlen(msg), msg, 2);
   }
 
 }

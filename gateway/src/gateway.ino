@@ -33,22 +33,13 @@ void loop() {
   
   if (radio.receiveDone())
   {
-    // Serial.print('[');Serial.print(radio.SENDERID, DEC);Serial.print("] ");
-    // if (promiscuousMode)
-    // {
-    //   Serial.print("to [");Serial.print(radio.TARGETID, DEC);Serial.print("] ");
-    // }
-    // for (byte i = 0; i < radio.DATALEN; i++)
-    //   Serial.print((char)radio.DATA[i]);
-    // Serial.print("   [RX_RSSI:");Serial.print(radio.RSSI);Serial.print("]");
-
     packet_print(radio.DATA, radio.RSSI);
     cylon_packet_t * p = (cylon_packet_t *)radio.DATA;
     if (is_ack_requested(radio.DATA))
     {
       // swap to<->from
       send_ack(radio, p->to, p->from);
-      Serial.print(" - ACK sent.");
+      Serial.println(" - ACK sent.");
 
       // When a node requests an ACK, respond to the ACK
       // and also send a packet requesting an ACK (every 3rd one only)
@@ -57,17 +48,13 @@ void loop() {
       {
         Serial.print(" Pinging node ");
         Serial.print(p->from, HEX);
-        Serial.print(" - ACK...");
         delay(6); //need this when sending right after reception .. ?
-        // if(
-        send_data(radio, p->to, p->from, REQUEST_ACK, 8, "ACK TEST");  // 0 = only 1 attempt, no retries
-        // )
-        //   Serial.print("ok!");
-        // else Serial.print("nothing");
+
+        send_data(radio, p->to, p->from, REQUEST_ACK, 8, "ACK TEST", 2);
       }
 
     }
-    Serial.println();
+
     Blink(LED,3);
   }
 }
