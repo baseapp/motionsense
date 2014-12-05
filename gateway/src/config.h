@@ -1,3 +1,6 @@
+#ifndef CONFIG_H_
+#define CONFIG_H_
+
 // GATEWAY config
 
 #define NODEID        1    //unique for each node on same network, 2 is node, 1 is gateway
@@ -18,3 +21,5 @@
 #define FLASH_SS      8 // and FLASH SS on D8
 
 #define SERIAL_BAUD   115200
+
+#endif

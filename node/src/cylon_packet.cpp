@@ -8,19 +8,19 @@ bool send_with_retry(RFM69 & radio, const void* buffer, byte bufferSize, byte re
 
 bool send_data(RFM69 & radio, uint32_t from, uint32_t to, uint8_t ack_byte, uint8_t length, char* message, uint8_t retries, uint8_t retryWaitTime)
 {
-  char buff[30];
+  char buff[MAX_PACKET_SIZE];
   cylon_packet_t * packet = (cylon_packet_t *)buff;
   packet->from = from;
   packet->to = to;
   packet->ack_byte = ack_byte;
   packet->length = length;
 
-  for(int i = sizeof(cylon_packet_t), j=0; (i<30) && (j<length); i++, j++)
+  for(int i = sizeof(cylon_packet_t), j=0; (i<MAX_PACKET_SIZE) && (j<length); i++, j++)
   {
     buff[i] = message[j];
   }
 
-  Serial.print("TX: ");packet_print(packet);
+  // Serial.print("TX: ");packet_print(packet);
 
   if(retries == 0)
   {
@@ -78,8 +78,9 @@ void packet_print(volatile void * p, int RSSI)
   }
 
   char *buf=(char*)packet+sizeof(cylon_packet_t);
-  for (byte i = 0; i < packet->length; i++)
+  for (byte i = 0; i < (packet->length); i++)
     Serial.print((char)buf[i]);
+  Serial.println("");
 }
 
 // send pre filled structured data. can be used for retry ack or retry data
@@ -100,12 +101,11 @@ bool send_with_retry(RFM69 & radio, const void* buffer, byte bufferSize, byte re
         cylon_packet_t * p = (cylon_packet_t *)radio.DATA;
         if( (p->from == dest) && is_ack(p) )
         {
-          Serial.println(" - ACK rcvd");
           return true;
         }
       }
     }
-    Serial.print(" RETRY#");Serial.println(i+1);
+    // Serial.print(" RETRY#");Serial.println(i+1);
   }
   return false;
 }

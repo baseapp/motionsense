@@ -22,10 +22,8 @@ void setup() {
   radio.encrypt(ENCRYPTKEY);
   radio.promiscuous(promiscuousMode);
   char buff[50];
-  sprintf(buff, "\nListening at %d Mhz...", FREQUENCY==RF69_433MHZ ? 433 : FREQUENCY==RF69_868MHZ ? 868 : 915);
-  Serial.println(buff);
-  
-    Serial.println("Starting");
+  // sprintf(buff, "\nListening at %d Mhz...", FREQUENCY==RF69_433MHZ ? 433 : FREQUENCY==RF69_868MHZ ? 868 : 915);
+  // Serial.println(buff);
 }
 
 byte ackCount=0;
@@ -39,20 +37,6 @@ void loop() {
     {
       // swap to<->from
       send_ack(radio, p->to, p->from);
-      Serial.println(" - ACK sent.");
-
-      // When a node requests an ACK, respond to the ACK
-      // and also send a packet requesting an ACK (every 3rd one only)
-      // This way both TX/RX NODE functions are tested on 1 end at the GATEWAY
-      if (ackCount++%3==0)
-      {
-        Serial.print(" Pinging node ");
-        Serial.print(p->from, HEX);
-        delay(6); //need this when sending right after reception .. ?
-
-        send_data(radio, p->to, p->from, REQUEST_ACK, 8, "ACK TEST", 2);
-      }
-
     }
 
     Blink(LED,3);
