@@ -26,6 +26,8 @@
 
 // conected to INT1 pin
 #define PIR_IRQ_NUM		1
+// PD3
+#define PIR_INT_PIN		3
 
 /* EEPROM offsets */
 //4 bytes

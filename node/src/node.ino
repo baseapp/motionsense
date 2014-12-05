@@ -122,6 +122,8 @@ void long_sleep(uint8_t times)
     times = 1;
 
   // digitalWrite(BOOST_REG_PIN, HIGH);
+  // TODO enable only when doing boost shutdown to save battery
+  #if 0
   if(times > 1)
   {
     // turn on boost and sleep for 1 cycle(8s)
@@ -131,6 +133,7 @@ void long_sleep(uint8_t times)
     pir_int_flag = false;
     sei();
   }
+  #endif
 
   while(times != 0)
   {
@@ -139,7 +142,7 @@ void long_sleep(uint8_t times)
     sleep_till_wdti();
 
     check_again:
-    Serial.println("som");
+    Serial.println("some interrupt");
 
     // turn boost off only if we have to to sleep for 1 cycle(8s)
     // if((pir_int_flag == true))
@@ -194,6 +197,8 @@ void setup()
 {
   // clock_prescale_set(clock_div_8);
 
+  Blink(LED,100);
+
   Serial.begin(SERIAL_BAUD);
   Serial.println("start");
 
@@ -206,8 +211,8 @@ void setup()
   digitalWrite(PIR_POWER_PIN, HIGH);
 
   // attach interrupt on pir output pin
-  pinMode(3, INPUT);
-  digitalWrite(3, HIGH);
+  pinMode(PIR_INT_PIN, INPUT);
+  digitalWrite(PIR_INT_PIN, HIGH);
   attachInterrupt(PIR_IRQ_NUM, pir_interrupt_handler, RISING);
 
   // get own address and gateway address from eeprom
