@@ -24,6 +24,9 @@ void setup() {
   char buff[50];
   // sprintf(buff, "\nListening at %d Mhz...", FREQUENCY==RF69_433MHZ ? 433 : FREQUENCY==RF69_868MHZ ? 868 : 915);
   // Serial.println(buff);
+  // wait for router to boot, do not send stray commands for 20s
+  for(int i=0;i<20;i++)
+    delay(1000);
 }
 
 byte ackCount=0;
