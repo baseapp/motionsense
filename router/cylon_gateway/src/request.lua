@@ -4,7 +4,8 @@ local P = {}
 
 request = P
 
-local https = require("ssl.https")
+-- https currently not supported, no space for openssl
+-- local https = require("ssl.https")
 local http  = require("socket.http")
 local url   = require("socket.url")
 local ltn12 = require("ltn12")
@@ -66,7 +67,8 @@ function request.http_request( args )
                                                         step=args.step, proxy=args.proxy, redirect=args.redirect, create=args.create 
                                                     }
     elseif parsed_url.scheme == 'https' then
-        local client, code, headers, status = https.request{  
+        print('https currently not supported, no space for openssl, will do http request')
+        local client, code, headers, status = http.request{  
                                                         url=args.base_url, sink=ltn12.sink.table(resp),
                                                         method=args.method or "GET", headers=args.headers, source=args.source,
                                                         step=args.step, proxy=args.proxy, redirect=args.redirect, create=args.create 
@@ -93,7 +95,8 @@ function request.download(base_url, path, maxsize)
                                                     }
         print(#resp, headers, code, status)
     elseif parsed_url.scheme == 'https' then
-        local client, code, headers, status = https.request{  
+        print('https currently not supported, no space for openssl, will do http request')
+        local client, code, headers, status = http.request{  
                                                         url=base_url, sink=ltn12.sink.table(resp),
                                                         method="GET"
                                                     }
@@ -114,7 +117,7 @@ end
 
 
 function request.test()
-	base_url = "https://httpbin.org/"
+	base_url = "http://httpbin.org/"
     -- Normal GET request
     endpoint = "/user-agent"
     print(endpoint)
@@ -146,9 +149,5 @@ function request.test()
     request.deep_print(request.http_request{base_url=base_url..endpoint, method="DELETE",     source=ltn12.source.string("a=23")})
 
 end
-
--- request.deep_print(request.http_request{base_url="https://parabolagnulinux.org/"})
--- request.deep_print(request.http_request{base_url="http://parabolagnulinux.org/"})
-
 
 return request

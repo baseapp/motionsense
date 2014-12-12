@@ -1,5 +1,7 @@
 #!/usr/bin/lua
 
+package.path = package.path .. ";/usr/bin/cylon/?.lua"
+
 local bit = require("bit")
 local json = require "dkjson"
 require "posix"
@@ -71,8 +73,8 @@ end
 
 ------------------------------------------------------------------------------
 -- using this file
-local port = '/dev/ttyUSB0'
-os.execute('/bin/stty -F ' .. port ..' 115200')
+local port = '/dev/ttyATH0'
+-- os.execute('/bin/stty -F ' .. port ..' 115200')
 ser = posix.open(port, bit.bor(posix.O_RDONLY, posix.O_NONBLOCK))
 if not ser then
 	print("couldn't open file")
@@ -90,10 +92,13 @@ packets_list = {}
 -- the buffer that is uploaded
 upload_table = {}
 -- url to post to
-upload_site = "https://httpbin.org/post"
+upload_site = "http://devhu.com/cylon"
 
 while true do
 	parse_dump(read_output(ser))
+
+	posix.wait(-1, posix.WNOHANG)
+
 	if (posix.time() - last_upload_time) > (upload_time) then
 		-- upload updates last_upload_time
 		last_upload_time = posix.time()

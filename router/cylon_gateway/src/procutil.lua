@@ -1,6 +1,6 @@
 #!/usr/bin/lua
 
-package.path = package.path .. ";/usr/lib/basetrack/?.lua"
+package.path = package.path .. ";/usr/bin/cylon/?.lua"
 
 require "posix"
 

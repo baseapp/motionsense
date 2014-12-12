@@ -1,0 +1,8 @@
+#! /bin/sh
+
+# console is used by gateway script
+cat <<EOF > /etc/inittab
+::sysinit:/etc/init.d/rcS S boot
+::shutdown:/etc/init.d/rcS K shutdown
+#::askconsole:/bin/ash --login
+EOF
