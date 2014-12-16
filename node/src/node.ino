@@ -25,6 +25,7 @@ uint8_t sleep_duration; // number of 8seconds to sleep for
 //flag that PIR interrupt occurred in last $interval time
 bool pir_int_flag=false;
 bool wdt_int_flag=false;
+bool button_int_flag=false;
 
 //little endian
 uint32_t get_eeprom_dword(int offset)
@@ -119,9 +120,9 @@ void long_sleep(uint8_t times)
   if(times == 0)
     times = 1;
 
-  // digitalWrite(BOOST_REG_PIN, HIGH);
+  digitalWrite(BOOST_REG_PIN, HIGH);
   // TODO enable only when doing boost shutdown to save battery
-  #if 0
+  // #if 1
   if(times > 1)
   {
     // turn on boost and sleep for 1 cycle(8s)
@@ -131,7 +132,7 @@ void long_sleep(uint8_t times)
     pir_int_flag = false;
     sei();
   }
-  #endif
+  // #endif
 
   while(times != 0)
   {
@@ -143,8 +144,23 @@ void long_sleep(uint8_t times)
     Serial.println("some interrupt");
 
     // turn boost off only if we have to to sleep for 1 cycle(8s)
-    // if((pir_int_flag == true))
-    //   digitalWrite(BOOST_REG_PIN, LOW);
+    if((pir_int_flag == true))
+      digitalWrite(BOOST_REG_PIN, LOW);
+
+    if(button_int_flag == true)
+    {
+      button_int_flag = false;
+      normal_mode();
+      radio.setHighPower(true);
+
+      transmit_button_status();
+      
+      radio.setHighPower(false);
+      radio.sleep();
+      enable_button_pci();
+      low_power_mode();
+      disable_button_pci();
+    }
 
     // if wdt interrupt, then wake up, else go back to sleep
     if(wdt_int_flag == true)
@@ -155,7 +171,9 @@ void long_sleep(uint8_t times)
     else
     {
       Serial.println("PIR int");
+      enable_button_pci();
       go_back_to_sleep();
+      disable_button_pci();
       goto check_again;
     }
   }
@@ -265,8 +283,8 @@ void setup()
   Serial.println("start");
 
   // enable boost regulator
-  // pinMode(BOOST_REG_PIN, OUTPUT);
-  // digitalWrite(BOOST_REG_PIN, HIGH);
+  pinMode(BOOST_REG_PIN, OUTPUT);
+  digitalWrite(BOOST_REG_PIN, HIGH);
 
   // enable PIR sensor
   pinMode(PIR_POWER_PIN, OUTPUT);
@@ -289,16 +307,17 @@ void setup()
   networkid = EEPROM.read(_FIXED_NETWORKID_OFF);
   sleep_duration = EEPROM.read(_SLEEP_DURATION_OFF);
 
-  self_address = 0xdeadbeef;
+  self_address = 3;//0xdeadbeef;
   gateway_address = 0xabad1dea;
   nodeid = NODEID;
   networkid = NETWORKID;
-  sleep_duration = 2;
+  sleep_duration = 5;
 
-  // EEPROM.write(_SELF_ADDRESS_OFF, 0xef);EEPROM.write(_SELF_ADDRESS_OFF+1, 0xbe);EEPROM.write(_SELF_ADDRESS_OFF+2, 0xad);EEPROM.write(_SELF_ADDRESS_OFF+3, 0xde);
+  // // EEPROM.write(_SELF_ADDRESS_OFF, 0xef);EEPROM.write(_SELF_ADDRESS_OFF+1, 0xbe);EEPROM.write(_SELF_ADDRESS_OFF+2, 0xad);EEPROM.write(_SELF_ADDRESS_OFF+3, 0xde);
+  // EEPROM.write(_SELF_ADDRESS_OFF, 0x00);EEPROM.write(_SELF_ADDRESS_OFF+1, 0x00);EEPROM.write(_SELF_ADDRESS_OFF+2, 0x00);EEPROM.write(_SELF_ADDRESS_OFF+3, 0x02);
   // EEPROM.write(_GATEWAY_ADDRESS_OFF, 0xea);EEPROM.write(_GATEWAY_ADDRESS_OFF+1, 0x1d);EEPROM.write(_GATEWAY_ADDRESS_OFF+2, 0xad);EEPROM.write(_GATEWAY_ADDRESS_OFF+3, 0xab);
-  // EEPROM.write(_FIXED_NODEID_OFF, 2);
-  // EEPROM.write(_FIXED_NETWORKID_OFF, 100);
+  // EEPROM.write(_FIXED_NODEID_OFF, NODEID);
+  // EEPROM.write(_FIXED_NETWORKID_OFF, NETWORKID);
 
   Serial.print("Self: ");Serial.println(self_address, HEX);
   Serial.print("Gateway: ");Serial.println(gateway_address, HEX);
@@ -312,7 +331,7 @@ void setup()
   radio.setHighPower(); //uncomment only for RFM69HW!
 
   radio.encrypt(ENCRYPTKEY);
-  radio.setPowerLevel(2);
+  radio.setPowerLevel(30);
   radio.promiscuous(true);
   char buff[50];
   sprintf(buff, "\nTransmitting at %d Mhz...", FREQUENCY==RF69_433MHZ ? 433 : FREQUENCY==RF69_868MHZ ? 868 : 915);
