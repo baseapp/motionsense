@@ -11,8 +11,6 @@
 #include "power_save.h"
 
 int TRANSMITPERIOD = 500; //transmit a packet to gateway so often (in ms)
-char payload[] = "123ABC";
-char buff[20];
 byte sendSize=0;
 boolean requestACK = false;
 RFM69 radio;
