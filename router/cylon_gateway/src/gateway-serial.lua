@@ -36,6 +36,7 @@ function upload(upload_table)
 		local retval = request.http_request{base_url=base_url, method="POST", source=ltn12.source.string(req_body), headers=headers}
 		request.deep_print(retval)
 		local res = retval.response[1]
+		print(res)
 		-- response.handle(res)
 		-- request.http_request{base_url=base_url, endpoint=endpoint, method="POST", source=ltn12.source.string(req_body), headers=headers}
 	end
@@ -92,7 +93,7 @@ packets_list = {}
 -- the buffer that is uploaded
 upload_table = {}
 -- url to post to
-upload_site = "http://devhu.com/cylon"
+upload_site = "http://cylon.baseapp.com/api/"
 
 while true do
 	parse_dump(read_output(ser))
