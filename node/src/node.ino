@@ -191,6 +191,70 @@ void transmit_status()
   }
 }
 
+void transmit_boot_status()
+{
+  char msg[MAX_PACKET_SIZE];
+
+  //send data
+  sprintf(msg, "batt: %lumV state: booting", read_vcc());
+  Serial.println(msg);
+  Serial.println("Sending packet");
+  if(send_data(radio, self_address, gateway_address, REQUEST_ACK, strlen(msg), msg, 2))
+  {
+    Serial.println(" - ACK rcvd");
+  }
+  else
+  {
+    Serial.println(" - nothing");
+  }
+  Serial.println("sent.");
+}
+
+void transmit_button_status()
+{
+  char msg[MAX_PACKET_SIZE];
+
+  //send data
+  sprintf(msg, "batt: %lumV state: button", read_vcc());
+  Serial.println(msg);
+  Serial.println("Sending packet");
+  if(send_data(radio, self_address, gateway_address, REQUEST_ACK, strlen(msg), msg, 2))
+  {
+    Serial.println(" - ACK rcvd");
+  }
+  else
+  {
+    Serial.println(" - nothing");
+  }
+  Serial.println("sent.");
+}
+
+void pciSetup(byte pin)
+{
+    *digitalPinToPCMSK(pin) |= bit (digitalPinToPCMSKbit(pin));  // enable pin
+    PCIFR  |= bit (digitalPinToPCICRbit(pin)); // clear any outstanding interrupt
+    PCICR  |= bit (digitalPinToPCICRbit(pin)); // enable interrupt for the group
+}
+
+void enable_button_pci()
+{
+  *digitalPinToPCMSK(BUTTON_INT_PIN_AN) |= bit (digitalPinToPCMSKbit(BUTTON_INT_PIN_AN));  // enable pin
+  PCIFR  |= bit (digitalPinToPCICRbit(BUTTON_INT_PIN_AN)); // clear any outstanding interrupt
+  PCICR  |= bit (digitalPinToPCICRbit(BUTTON_INT_PIN_AN)); // enable interrupt for the group
+}
+
+void disable_button_pci()
+{
+  *digitalPinToPCMSK(BUTTON_INT_PIN_AN) &= ~ bit (digitalPinToPCMSKbit(BUTTON_INT_PIN_AN));  // enable pin
+  PCIFR  &= ~ bit (digitalPinToPCICRbit(BUTTON_INT_PIN_AN)); // clear any outstanding interrupt
+  PCICR  &= ~ bit (digitalPinToPCICRbit(BUTTON_INT_PIN_AN)); // enable interrupt for the group
+}
+
+ISR (PCINT1_vect) // handle pin change interrupt for A0 to A5 here
+{
+    button_int_flag = true;
+}
+
 void setup() 
 {
   // clock_prescale_set(clock_div_8);
@@ -212,6 +276,11 @@ void setup()
   pinMode(PIR_INT_PIN, INPUT);
   digitalWrite(PIR_INT_PIN, HIGH);
   attachInterrupt(PIR_IRQ_NUM, pir_interrupt_handler, RISING);
+
+  // button interrupt to reset board
+  pinMode(BUTTON_INT_PIN, INPUT);
+  digitalWrite(BUTTON_INT_PIN, HIGH);
+  // pciSetup(A3);
 
   // get own address and gateway address from eeprom
   self_address = get_eeprom_dword(_SELF_ADDRESS_OFF);
@@ -252,10 +321,8 @@ void setup()
   low_power_mode();
   normal_mode();
 
-  // radio.setHighPower(false);
-  // radio.sleep();
-  // low_power_mode();
-  // while(1){sleep_till_wdti();};
+  radio.setHighPower(true);
+  transmit_boot_status();
 }
 
 void loop() 
