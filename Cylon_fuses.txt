@@ -1,0 +1,9 @@
+Cylon fuses
+
+extended 0xFE
+low fuse 0xE2
+high fuses 0xD9
+
+BOD 1.8v
+internal 8MHz
+Clkdiv8 disabled
