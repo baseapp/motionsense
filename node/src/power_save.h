@@ -9,6 +9,8 @@
 #include <avr/io.h>
 
 void wdt_enable_intonly();
+void wdt_enable_reset();
+void wdt_dis();
 void low_power_mode();
 void normal_mode();
 

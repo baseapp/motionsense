@@ -15,18 +15,42 @@ void wdt_enable_intonly()
 	MCUSR = 0x00;  //clear all reset flags
 	//set WD_ChangeEnable and WD_resetEnable to alter the register
 	WDTCSR |= (1<<WDCE) | (1<<WDE);   // this is a timed sequence to protect WDTCSR
-	WDTCSR = (1<<WDP3) | (1<<WDP0) | (1<<WDIE);
+	WDTCSR = (1<<WDP3) | (1<<WDP0) | (1<<WDIE); //8s
 	WDTCSR &= ~(1<<WDE);
 	sei(); //enable global interrupts
 }
 
+void wdt_enable_reset()
+{
+	cli(); //disable global interrupts
+	MCUSR = 0x00;  //clear all reset flags
+	//set WD_ChangeEnable and WD_resetEnable to alter the register
+	WDTCSR |= (1<<WDCE) | (1<<WDE);   // this is a timed sequence to protect WDTCSR
+	WDTCSR = (1<<WDP3) | (1<<WDP0) | (1<<WDIE) | (1<<WDE); //8s int and reset
+	// WDTCSR &= ~(1<<WDE);
+	sei(); //enable global interrupts
+}
+
+void wdt_dis()
+{
+	cli(); //disable global interrupts
+	MCUSR = 0x00;  //clear all reset flags
+	//set WD_ChangeEnable and WD_resetEnable to alter the register
+	WDTCSR |= (1<<WDCE) | (1<<WDE);   // this is a timed sequence to protect WDTCSR
+	WDTCSR = (1<<WDP3) | (1<<WDP0) | (1<<WDIE); //8s int and reset
+	WDTCSR &= ~(1<<WDE);
+	sei(); //enable global interrupts	
+}
+
 // wdt_disable() is same as in libc
+
+// wdt_reset() pet wdt
 
 void low_power_mode()
 {
-#ifdef BATTERY_DEBUG
-#endif
+#ifdef DEBUG
 	Serial.println("low power mode");
+#endif
 	
 	// Serial.flush();
 	// pinMode(0, OUTPUT);
@@ -70,5 +94,7 @@ void normal_mode()
 	pinMode(MOSI, OUTPUT);
 	pinMode(SCK, OUTPUT);
 
+#ifdef DEBUG
 	Serial.println("normal mode");
+#endif
 }

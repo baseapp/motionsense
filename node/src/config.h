@@ -3,6 +3,8 @@
 
 // NODE config
 
+#define DEBUG
+
 #define NODEID        2    //unique for each node on same network, 2 is node, 1 is gateway
 #define NETWORKID     100  //the same on all nodes that talk to each other
 
@@ -30,6 +32,8 @@
 #define PIR_IRQ_NUM		1
 // PD3
 #define PIR_INT_PIN		3
+// RST pin of radio, PD5
+#define RST_PIN			5
 
 // button PC3 PCINT11, pin17 A3
 #define BUTTON_INT_PIN	17

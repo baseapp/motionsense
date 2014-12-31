@@ -16,17 +16,17 @@ void setup() {
   Serial.begin(SERIAL_BAUD);
   delay(10);
   radio.initialize(FREQUENCY,NODEID,NETWORKID);
-#ifdef IS_RFM69HW
+
   radio.setHighPower(); //only for RFM69HW!
-#endif
+
   radio.encrypt(ENCRYPTKEY);
   radio.promiscuous(promiscuousMode);
   char buff[50];
-  // sprintf(buff, "\nListening at %d Mhz...", FREQUENCY==RF69_433MHZ ? 433 : FREQUENCY==RF69_868MHZ ? 868 : 915);
-  // Serial.println(buff);
+  sprintf(buff, "\nListening at %d Mhz...", FREQUENCY==RF69_433MHZ ? 433 : FREQUENCY==RF69_868MHZ ? 868 : 915);
+  Serial.println(buff);
   // wait for router to boot, do not send stray commands for 20s
-  for(int i=0;i<20;i++)
-    delay(1000);
+  // for(int i=0;i<20;i++)
+  //   delay(1000);
 }
 
 byte ackCount=0;
@@ -35,6 +35,7 @@ void loop() {
   if (radio.receiveDone())
   {
     packet_print(radio.DATA, radio.RSSI);
+    Serial.println("got packet");
     cylon_packet_t * p = (cylon_packet_t *)radio.DATA;
     if (is_ack_requested(radio.DATA))
     {
@@ -42,7 +43,7 @@ void loop() {
       send_ack(radio, p->to, p->from);
     }
 
-    Blink(LED,3);
+    // Blink(LED,3);
   }
 }
 
